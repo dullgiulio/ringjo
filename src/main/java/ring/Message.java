@@ -47,6 +47,6 @@ public class Message implements Serializable {
 			return false;
 		}
 		return Objects.equals(((Message) o).getDate(), this.date) &&
-				Objects.equals(((Message) o).getContent(), this.content);
+				Arrays.equals(((Message) o).getContent(), this.content);
 	}
 }

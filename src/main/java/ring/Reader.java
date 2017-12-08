@@ -8,16 +8,26 @@ public class Reader implements Serializable {
 	private String name;
 	private long pos;
 	private int capacity;
+	private boolean started;
 	private ArrayList<Message> buffer;
 
 	public Reader(String name, int capacity) {
 		this.name = name;
 		this.capacity = capacity;
+		this.started = false;
 		this.buffer = new ArrayList<>(capacity);
 	}
 
 	public String getName() {
 		return name;
+	}
+
+	public boolean hasStarted() {
+		return started;
+	}
+
+	public void setStarted() {
+		started = true;
 	}
 
 	public long getPos() {

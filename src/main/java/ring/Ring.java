@@ -14,28 +14,33 @@ public class Ring {
 
 	public void write(Message msg) {
 		if (last != null) {
-			int lastDistance = (int)(pos - last.getPos());
+			int lastDistance = (int) (pos - last.getPos());
 			// If the slowest reader is in the way, it will skip some messages.
 			// Advance the slowest reader to the current writing position.
 			if (pos > 0 && lastDistance >= size) {
-				last.setPos(pos-size+1);
+				last.setPos(pos - size + 1);
 			}
 		}
-		int p = (int)(pos % size);
+		int p = (int) (pos % size);
 		buffer[p] = msg;
 		this.pos++;
 	}
 
 	public void read(Reader rd) {
+		// New readers start from the beginning inside the ring
+		if (!rd.hasStarted()) {
+			rd.setPos(last.getPos());
+			rd.setStarted();
+		}
 		rd.clear();
-		int nmessages = (int)(pos - rd.getPos());
+		int nMessages = (int) (pos - rd.getPos());
 		// No new messages to read.
-		if (nmessages <= 0) {
+		if (nMessages <= 0) {
 			return;
 		}
 		// Read maximum Reader.capacity messages.
-		if (nmessages > rd.getCapacity()) {
-			nmessages = rd.getCapacity();
+		if (nMessages > rd.getCapacity()) {
+			nMessages = rd.getCapacity();
 		}
 		long start = rd.getPos();
 		if (start < last.getPos()) {
@@ -43,8 +48,8 @@ public class Ring {
 			start = last.getPos();
 			rd.setPos(start);
 		}
-		for (int i = 0; i < nmessages; i++) {
-			int p = (int)((start+i) % size);
+		for (int i = 0; i < nMessages; i++) {
+			int p = (int) ((start + i) % size);
 			rd.addMessage(buffer[p]);
 		}
 	}
