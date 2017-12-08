@@ -33,6 +33,19 @@ public class Executor implements Runnable {
 		return future; // TODO: Actual return should be just an empty future.
 	}
 
+	public Future<Boolean> writeBatch(Iterable<Message> msgs) throws InterruptedException {
+		CompletableFuture<Boolean> future = new CompletableFuture<>();
+		submit(() -> {
+			// TODO: fail if there are more messages than space available!
+			for (Message msg : msgs) {
+				ring.write(msg);
+			}
+			future.complete(true);
+			return true;
+		});
+		return future; // TODO: Actual return should be just an empty future.
+	}
+
 	public Future<Boolean> stop() throws InterruptedException {
 		CompletableFuture<Boolean> future = new CompletableFuture<>();
 		submit(() -> {
