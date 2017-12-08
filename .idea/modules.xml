@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/ringjo.iml" filepath="$PROJECT_DIR$/.idea/modules/ringjo.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/ringjo_main.iml" filepath="$PROJECT_DIR$/.idea/modules/ringjo_main.iml" group="ringjo" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/ringjo_test.iml" filepath="$PROJECT_DIR$/.idea/modules/ringjo_test.iml" group="ringjo" />
+    </modules>
+  </component>
+</project>
