@@ -11,6 +11,10 @@ public class Reader implements Serializable {
 	private boolean started;
 	private ArrayList<Message> buffer;
 
+	public Reader() {
+		// TODO: For write future. This should not be necessary, remove.
+	}
+
 	public Reader(String name, int capacity) {
 		this.name = name;
 		this.capacity = capacity;

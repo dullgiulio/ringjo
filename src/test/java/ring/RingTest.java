@@ -6,7 +6,8 @@ import org.junit.runners.Suite;
 @RunWith(Suite.class)
 @Suite.SuiteClasses({
 		RingWriterTest.class,
-		RingReaderTest.class
+		RingReaderTest.class,
+		ExecutorTest.class
 })
 public class RingTest {
 }
