@@ -13,13 +13,11 @@ public class Ring {
 	}
 
 	public void write(Message msg) {
-		if (last != null) {
-			int lastDistance = (int) (pos - last.getPos());
-			// If the slowest reader is in the way, it will skip some messages.
-			// Advance the slowest reader to the current writing position.
-			if (pos > 0 && lastDistance >= size) {
-				last.setPos(pos - size + 1);
-			}
+		int lastDistance = (int) (pos - last.getPos());
+		// If the slowest reader is in the way, it will skip some messages.
+		// Advance the slowest reader to the current writing position.
+		if (pos > 0 && lastDistance >= size) {
+			last.setPos(pos - size + 1);
 		}
 		int p = (int) (pos % size);
 		buffer[p] = msg;
