@@ -8,9 +8,9 @@ public class Executor implements Runnable {
 	private Ring ring;
 	private BlockingQueue<Callable<Boolean>> queue;
 
-	public Executor(int queueSize) {
+	public Executor(int ringSize, int queueSize) {
 		queue = new ArrayBlockingQueue<>(queueSize);
-		ring = new Ring(10);
+		ring = new Ring(ringSize);
 	}
 
 	public Future<Reader> read(Reader r) throws InterruptedException {

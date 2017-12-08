@@ -11,7 +11,7 @@ import static org.junit.Assert.*;
 public class ExecutorTest {
 	@Test
 	public void executorOnSeparateThread() throws InterruptedException, ExecutionException {
-		Executor executor = new Executor(1024);
+		Executor executor = new Executor(10, 1024);
 		Thread t = new Thread(executor);
 		t.start();
 		Reader r = new Reader("test reader", 2);
