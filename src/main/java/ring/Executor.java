@@ -3,10 +3,12 @@ package ring;
 import ring.futures.ReaderFuture;
 
 import java.util.concurrent.*;
+import java.util.logging.Logger;
 
 public class Executor implements Runnable {
 	private Ring ring;
 	private BlockingQueue<Callable<Boolean>> queue;
+	private Logger logger = Logger.getLogger("RING");
 
 	public Executor(int ringSize, int queueSize) {
 		queue = new ArrayBlockingQueue<>(queueSize);
@@ -66,17 +68,17 @@ public class Executor implements Runnable {
 			try {
 				c = queue.take();
 			} catch (InterruptedException e) {
-				System.out.printf("A task was interrupted, exiting...\n"); // TODO: proper logging
+				logger.info("A task was interrupted, exiting...");
 				return;
 			}
 			try {
 				Boolean ok = c.call();
 				if (!ok) {
-					System.out.printf("Loop shutting down, exiting...\n"); // TODO: proper logging
+					logger.info("Loop shutting down, exiting...");
 					return;
 				}
 			} catch (Exception e) {
-				System.out.printf("Skipped action: could not execute callable: %s\n", e.getMessage()); // TODO: proper logging
+				logger.info(String.format("Skipped action: could not execute callable: %s", e.getMessage()));
 			}
 		}
 	}
