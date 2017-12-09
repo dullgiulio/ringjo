@@ -48,10 +48,14 @@ public class RingReaderTest {
 		Reader r1 = new Reader("Test", 2);
 		ring.read(r1);
 		assertEquals(2, r1.getPos());
+		ArrayList<Message> buffer = r1.getBuffer();
+		Message msg = buffer.get(0);
+		assertEquals("Test 1", new String(msg.getContent()));
+		msg = buffer.get(1);
+		assertEquals("Test 2", new String(msg.getContent()));
 		Reader r2 = new Reader("Test", 5);
 		ring.read(r2);
 		assertEquals(3, r2.getPos());
-
 	}
 
 	@Test

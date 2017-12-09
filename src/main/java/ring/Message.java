@@ -33,7 +33,7 @@ public class Message implements Serializable {
 	}
 
 	public void setContent(byte[] content) {
-		this.content = content;
+		this.content = Arrays.copyOf(content, content.length);
 	}
 
 	@Override
