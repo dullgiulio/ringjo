@@ -16,18 +16,11 @@ public class Reader implements Serializable {
 		this.capacity = capacity;
 		this.started = false;
 		this.buffer = new ArrayList<>(capacity);
+		this.pos = 0;
 	}
 
 	public String getName() {
 		return name;
-	}
-
-	public boolean hasStarted() {
-		return started;
-	}
-
-	public void setStarted() {
-		started = true;
 	}
 
 	public long getPos() {

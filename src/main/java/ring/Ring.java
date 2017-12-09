@@ -27,17 +27,13 @@ public class Ring {
 		if (pos == 0) {
 			return;
 		}
-		// New readers start from the beginning inside the ring
-		if (!rd.hasStarted()) {
-			if (pos < size) {
-				rd.setPos(0);
-			} else {
-				rd.setPos(pos - size);
-			}
-			rd.setStarted();
+		long start = rd.getPos();
+		// New readers start from the beginning inside the ring if we wrapper around.
+		if (start == 0 && pos > size) {
+			start = pos - size;
 		}
 		rd.clear();
-		int nMessages = (int) (pos - rd.getPos());
+		int nMessages = (int) (pos - start);
 		// No new messages to read.
 		if (nMessages <= 0) {
 			return;
@@ -46,15 +42,14 @@ public class Ring {
 		if (nMessages > rd.getCapacity()) {
 			nMessages = rd.getCapacity();
 		}
-		long start = rd.getPos();
 		if (start < last) {
 			// TODO: signal that there are skipped messages
 			start = last;
-			rd.setPos(start);
 		}
 		for (int i = 0; i < nMessages; i++) {
 			int p = (int) ((start + i) % size);
 			rd.addMessage(buffer[p]);
 		}
+		rd.setPos(start + nMessages);
 	}
 }
