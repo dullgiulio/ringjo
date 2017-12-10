@@ -8,7 +8,7 @@ import java.util.logging.Logger;
 
 public class Executor implements Runnable {
 	private Ring ring;
-	private BlockingQueue<Callable<Boolean>> queue;
+	private BlockingQueue<Callable<CompletableFuture<Boolean>>> queue;
 	private Logger logger = Logger.getLogger("RING");
 
 	public Executor(int ringSize, int queueSize) {
@@ -21,7 +21,7 @@ public class Executor implements Runnable {
 		submit(() -> {
 			ring.read(r);
 			readerFuture.put(r);
-			return true;
+			return null;
 		});
 		return readerFuture;
 	}
@@ -31,7 +31,7 @@ public class Executor implements Runnable {
 		submit(() -> {
 			ring.write(msg);
 			future.complete(true);
-			return true;
+			return null;
 		});
 		return future;
 	}
@@ -43,29 +43,27 @@ public class Executor implements Runnable {
 				ring.write(msg);
 			}
 			future.complete(true);
-			return true;
+			return null;
 		});
 		return future;
 	}
 
-	public Future<Boolean> stop() throws InterruptedException {
-		CompletableFuture<Boolean> future = new CompletableFuture<>();
+	public CompletableFuture<Boolean> stop() throws InterruptedException {
+		CompletableFuture<Boolean> stopped = new CompletableFuture<>();
 		submit(() -> {
-			future.complete(true);
-			// TODO: Complete future on actual exit!
-			return false; // Stop execution.
+			return stopped; // Stop execution and signal back.
 		});
-		return future;
+		return stopped;
 	}
 
-	private void submit(Callable<Boolean> c) throws InterruptedException {
+	private void submit(Callable<CompletableFuture<Boolean>> c) throws InterruptedException {
 		queue.put(c);
 	}
 
 	@Override
 	public void run() {
 		while (true) {
-			Callable<Boolean> c;
+			Callable<CompletableFuture<Boolean>> c;
 			try {
 				c = queue.take();
 			} catch (InterruptedException e) {
@@ -73,9 +71,11 @@ public class Executor implements Runnable {
 				return;
 			}
 			try {
-				Boolean ok = c.call();
-				if (!ok) {
+				CompletableFuture<Boolean> done = c.call();
+				if (done != null) {
 					logger.info("Loop shutting down, exiting...");
+					// ... could do any cleanup here.
+					done.complete(true);
 					return;
 				}
 			} catch (Exception e) {
