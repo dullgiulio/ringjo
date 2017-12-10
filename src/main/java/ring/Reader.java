@@ -2,6 +2,7 @@ package ring;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class Reader implements Serializable {
@@ -37,11 +38,11 @@ public class Reader implements Serializable {
 		return capacity;
 	}
 
-	public ArrayList<Message> getBuffer() {
-		return buffer;
+	public List<Message> getBuffer() {
+		return buffer.subList(0, rpos);
 	}
 
-	public void clear() {
+	public void reset() {
 		rpos = 0;
 	}
 
@@ -52,15 +53,6 @@ public class Reader implements Serializable {
 			buffer.set(rpos, msg);
 		}
 		rpos++;
-	}
-
-	public void trim() {
-		int size = buffer.size();
-		int last = rpos;
-		while (rpos < size) {
-			buffer.remove(last);
-			rpos++;
-		}
 	}
 
 	@Override

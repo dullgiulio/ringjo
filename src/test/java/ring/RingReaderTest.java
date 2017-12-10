@@ -2,7 +2,7 @@ package ring;
 
 import org.junit.Test;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 
@@ -12,7 +12,7 @@ public class RingReaderTest {
 		Ring ring = new Ring(4);
 		Reader r = new Reader("Test", 2);
 		ring.read(r);
-		ArrayList<Message> buffer = r.getBuffer();
+		List<Message> buffer = r.getBuffer();
 		assertEquals(0, buffer.size());
 	}
 
@@ -26,13 +26,14 @@ public class RingReaderTest {
 		ring.write(new Message("Test 3"));
 		ring.read(r);
 		assertEquals(2, r.getPos());
-		ArrayList<Message> buffer = r.getBuffer();
+		List<Message> buffer = r.getBuffer();
 		assertEquals(2, buffer.size());
 		msg = buffer.get(0);
 		assertEquals("Test 1", new String(msg.getContent()));
 		msg = buffer.get(1);
 		assertEquals("Test 2", new String(msg.getContent()));
 		ring.read(r);
+		buffer = r.getBuffer();
 		assertEquals(3, r.getPos());
 		assertEquals(1, buffer.size());
 		msg = buffer.get(0);
@@ -48,7 +49,7 @@ public class RingReaderTest {
 		Reader r1 = new Reader("Test", 2);
 		ring.read(r1);
 		assertEquals(2, r1.getPos());
-		ArrayList<Message> buffer = r1.getBuffer();
+		List<Message> buffer = r1.getBuffer();
 		Message msg = buffer.get(0);
 		assertEquals("Test 1", new String(msg.getContent()));
 		msg = buffer.get(1);
@@ -69,7 +70,7 @@ public class RingReaderTest {
 		Reader r = new Reader("Test", 2);
 		Message msg;
 		ring.read(r); // reads first two
-		ArrayList<Message> buffer = r.getBuffer();
+		List<Message> buffer = r.getBuffer();
 		msg = buffer.get(0);
 		assertEquals("Test 2", new String(msg.getContent()));
 		msg = buffer.get(1);

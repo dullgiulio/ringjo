@@ -24,9 +24,8 @@ public class Ring {
 	}
 
 	public void read(Reader rd) {
-		rd.clear();
+		rd.reset();
 		if (pos == 0) {
-			rd.trim();
 			return;
 		}
 		long start = rd.getPos();
@@ -37,7 +36,6 @@ public class Ring {
 		int nMessages = (int) (pos - start);
 		// No new messages to read.
 		if (nMessages <= 0) {
-			rd.trim();
 			return;
 		}
 		// Read maximum Reader.capacity messages.
@@ -52,7 +50,6 @@ public class Ring {
 			int p = (int) ((start + i) % size);
 			rd.addMessage(buffer[p]);
 		}
-		rd.trim();
 		rd.setPos(start + nMessages);
 	}
 }

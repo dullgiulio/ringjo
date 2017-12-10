@@ -2,11 +2,11 @@ package ring;
 
 import org.junit.Test;
 
-import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class ExecutorTest {
 	@Test
@@ -19,7 +19,7 @@ public class ExecutorTest {
 		executor.write(new Message("test 2"));
 		Future<Reader> fr = executor.read(r);
 		r = fr.get();
-		ArrayList<Message> buffer = r.getBuffer();
+		List<Message> buffer = r.getBuffer();
 		assertEquals(2, buffer.size());
 		Message msg = buffer.get(0);
 		assertEquals("test 1", new String(msg.getContent()));
