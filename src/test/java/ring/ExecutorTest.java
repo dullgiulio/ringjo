@@ -26,7 +26,7 @@ public class ExecutorTest {
 		msg = buffer.get(1);
 		assertEquals("test 2", new String(msg.getContent()));
 		fr = executor.read(r);
-		r = fr.get(); // Ignore, but should use for subsequent reads.
+		r = fr.get();
 		buffer = r.getBuffer();
 		assertEquals(0, buffer.size());
 		Future<Boolean> fb = executor.stop();

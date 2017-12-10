@@ -6,7 +6,8 @@ import java.util.Objects;
 
 public class Reader implements Serializable {
 	private String name;
-	private long pos;
+	private long pos; // Position in ringbuffer
+	private int rpos; // Position in reader buffer
 	private int capacity;
 	private boolean started;
 	private ArrayList<Message> buffer;
@@ -17,6 +18,7 @@ public class Reader implements Serializable {
 		this.started = false;
 		this.buffer = new ArrayList<>(capacity);
 		this.pos = 0;
+		this.rpos = 0;
 	}
 
 	public String getName() {
@@ -35,21 +37,30 @@ public class Reader implements Serializable {
 		return capacity;
 	}
 
-	public void setCapacity(int capacity) {
-		this.capacity = capacity;
-	}
-
 	public ArrayList<Message> getBuffer() {
 		return buffer;
 	}
 
 	public void clear() {
-		buffer.clear();
+		rpos = 0;
 	}
 
 	public void addMessage(Message msg) {
-		buffer.add(msg);
-		pos++;
+		if (rpos >= buffer.size()) {
+			buffer.add(msg);
+		} else {
+			buffer.set(rpos, msg);
+		}
+		rpos++;
+	}
+
+	public void trim() {
+		int size = buffer.size();
+		int last = rpos;
+		while (rpos < size) {
+			buffer.remove(last);
+			rpos++;
+		}
 	}
 
 	@Override

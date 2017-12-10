@@ -1,5 +1,8 @@
 package ring;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.io.Serializable;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -8,32 +11,38 @@ import java.util.Objects;
 
 public class Message implements Serializable {
 	private LocalDateTime date;
-	private byte[] content;
+	private ByteArrayOutputStream content;
 
 	public Message(String content) {
-		this.date = LocalDateTime.now();
-		this.content = content.getBytes(StandardCharsets.UTF_8);
+		this(content.getBytes(StandardCharsets.UTF_8));
 	}
 
-	public Message(byte[] content) {
+	public Message(byte[] bytes) {
 		this.date = LocalDateTime.now();
-		this.content = Arrays.copyOf(content, content.length);
+		this.content = new ByteArrayOutputStream(bytes.length);
+		this.content.write(bytes, 0, bytes.length);
+	}
+
+	public void set(Message msg) throws IOException {
+		date = msg.getDate();
+		content.reset();
+		msg.writeTo(this);
+	}
+
+	public void writeTo(Message msg) throws IOException {
+		content.writeTo(msg.getBuffer());
+	}
+
+	public OutputStream getBuffer() {
+		return content;
 	}
 
 	public LocalDateTime getDate() {
 		return date;
 	}
 
-	public void setDate(LocalDateTime date) {
-		this.date = date;
-	}
-
 	public byte[] getContent() {
-		return content;
-	}
-
-	public void setContent(byte[] content) {
-		this.content = Arrays.copyOf(content, content.length);
+		return content.toByteArray();
 	}
 
 	@Override
@@ -46,7 +55,7 @@ public class Message implements Serializable {
 		if (!(o instanceof Message)) {
 			return false;
 		}
-		return Objects.equals(((Message) o).getDate(), this.date) &&
-				Arrays.equals(((Message) o).getContent(), this.content);
+		return Objects.equals(((Message) o).getDate(), getDate()) &&
+				Arrays.equals(((Message) o).getContent(), getContent());
 	}
 }

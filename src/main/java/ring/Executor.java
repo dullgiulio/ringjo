@@ -3,6 +3,7 @@ package ring;
 import ring.futures.ReaderFuture;
 
 import java.util.concurrent.*;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Executor implements Runnable {
@@ -32,29 +33,29 @@ public class Executor implements Runnable {
 			future.complete(true);
 			return true;
 		});
-		return future; // TODO: Actual return should be just an empty future.
+		return future;
 	}
 
 	public Future<Boolean> writeBatch(Iterable<Message> msgs) throws InterruptedException {
 		CompletableFuture<Boolean> future = new CompletableFuture<>();
 		submit(() -> {
-			// TODO: fail if there are more messages than space available!
 			for (Message msg : msgs) {
 				ring.write(msg);
 			}
 			future.complete(true);
 			return true;
 		});
-		return future; // TODO: Actual return should be just an empty future.
+		return future;
 	}
 
 	public Future<Boolean> stop() throws InterruptedException {
 		CompletableFuture<Boolean> future = new CompletableFuture<>();
 		submit(() -> {
 			future.complete(true);
+			// TODO: Complete future on actual exit!
 			return false; // Stop execution.
 		});
-		return future; // TODO: Actual return should be just an empty future.
+		return future;
 	}
 
 	private void submit(Callable<Boolean> c) throws InterruptedException {
@@ -78,7 +79,7 @@ public class Executor implements Runnable {
 					return;
 				}
 			} catch (Exception e) {
-				logger.info(String.format("Skipped action: could not execute callable: %s", e.getMessage()));
+				logger.log(Level.SEVERE, "Exception", e);
 			}
 		}
 	}
