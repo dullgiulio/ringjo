@@ -1,13 +1,23 @@
 package verticles;
 
+import codecs.ReaderCodec;
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Context;
 import io.vertx.core.Handler;
+import io.vertx.core.Vertx;
+import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 import ring.Line;
 import ring.Reader;
 import ring.Ring;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.StringReader;
+import java.util.ArrayList;
+import java.util.List;
 
 public class BusExecutor extends AbstractVerticle {
 	private Ring ring;
@@ -20,15 +30,6 @@ public class BusExecutor extends AbstractVerticle {
 		return this;
 	}
 
-	private class HandleWrite implements Handler<Message<Line>> {
-		@Override
-		public void handle(Message<Line> event) {
-			Line line = event.body();
-			LOG.info(String.format("Received write '%s'", line.getContent()));
-			ring.write(line);
-		}
-	}
-
 	private class HandleRead implements Handler<Message<Reader>> {
 		@Override
 		public void handle(Message<Reader> event) {
@@ -39,10 +40,47 @@ public class BusExecutor extends AbstractVerticle {
 		}
 	}
 
+	private class HandleWriteBuffer implements Handler<Message<Buffer>> {
+		private List<String> splitLines(Buffer buffer) {
+			List<String> lines = new ArrayList<>();
+			BufferedReader rdr = new BufferedReader(new StringReader(buffer.toString()));
+			try {
+				for (String line = rdr.readLine(); line != null; line = rdr.readLine()) {
+					lines.add(line);
+				}
+				rdr.close();
+			} catch (IOException e) {
+				lines = null;
+			}
+			return lines;
+		}
+
+		@Override
+		public void handle(Message<Buffer> event) {
+			LOG.info("Received full buffer write");
+			Buffer body = event.body();
+			List<String> lines = splitLines(body);
+			if (lines == null) {
+				event.reply(-1);
+				return;
+			}
+			for (String line : lines) {
+				ring.write(new Line(line));
+			}
+			event.reply(lines.size());
+		}
+	}
+
+	@Override
+	public void init(Vertx vertx, Context context) {
+		super.init(vertx, context);
+		vertx.eventBus().registerDefaultCodec(Reader.class, new ReaderCodec());
+	}
+
 	@Override
 	public void start() {
 		ring = new Ring(ringSize);
 		vertx.eventBus().consumer("ringjo.read", new HandleRead());
-		vertx.eventBus().consumer("ringjo.write", new HandleWrite());
+		vertx.eventBus().consumer("ringjo.write", new HandleWriteBuffer());
 	}
 }

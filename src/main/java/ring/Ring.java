@@ -1,8 +1,8 @@
 package ring;
 
 public class Ring {
-	protected int size;
-	protected Line[] buffer;
+	final protected int size;
+	final protected Line[] buffer;
 	protected long last = 0;
 	protected long pos = 0;
 

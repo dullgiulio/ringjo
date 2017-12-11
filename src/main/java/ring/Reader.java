@@ -6,20 +6,23 @@ import java.util.List;
 import java.util.Objects;
 
 public class Reader implements Serializable {
-	private String name;
+	final private String name;
+	final private int capacity;
+
 	private long pos; // Position in ringbuffer
 	private int rpos; // Position in reader buffer
-	private int capacity;
-	private boolean started;
 	private ArrayList<Line> buffer;
 
 	public Reader(String name, int capacity) {
 		this.name = name;
 		this.capacity = capacity;
-		this.started = false;
 		this.buffer = new ArrayList<>(capacity);
 		this.pos = 0;
 		this.rpos = 0;
+	}
+
+	public void setBuffer(List<Line> buffer) {
+		this.buffer = new ArrayList<>(buffer);
 	}
 
 	public String getName() {
@@ -28,6 +31,14 @@ public class Reader implements Serializable {
 
 	public long getPos() {
 		return pos;
+	}
+
+	public long getReaderPos() {
+		return rpos;
+	}
+
+	public void setReaderPos(int rpos) {
+		this.rpos = rpos;
 	}
 
 	public void setPos(long pos) {

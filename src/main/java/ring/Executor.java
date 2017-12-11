@@ -9,8 +9,8 @@ import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
 public class Executor implements Runnable {
-	private Ring ring;
-	private BlockingQueue<Callable<Future<Void>>> queue;
+	final private Ring ring;
+	final private BlockingQueue<Callable<Future<Void>>> queue;
 	private static final Logger logger = LoggerFactory.getLogger(Executor.class);
 
 	public Executor(int ringSize, int queueSize) {
@@ -61,7 +61,9 @@ public class Executor implements Runnable {
 	private void submit(Callable<Future<Void>> c) {
 		try {
 			queue.put(c);
-		} catch (InterruptedException e) {}
+		} catch (InterruptedException e) {
+			logger.info("Interrupted!");
+		}
 	}
 
 	@Override

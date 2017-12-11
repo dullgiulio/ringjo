@@ -12,7 +12,7 @@ import static org.junit.Assert.assertEquals;
 public class ExecutorTest {
 	Executor executor;
 	Thread executorThread;
-	Future<Void> done = Future.future();
+	final Future<Void> done = Future.future();
 
 	@Before
 	public void setUp() {
@@ -44,7 +44,7 @@ public class ExecutorTest {
 	}
 
 	@Test
-	public void executorOnSeparateThread() throws InterruptedException {
+	public void executorOnSeparateThread() {
 		executorThread.start();
 		Reader r = new Reader("test reader", 2);
 		executor.write(new Line("test 1"));
@@ -59,7 +59,7 @@ public class ExecutorTest {
 		try {
 			executorThread.join();
 		} catch(InterruptedException e) {
-			System.out.printf("Interrupted\n");
+			System.out.print("Interrupted\n");
 		}
 	}
 }

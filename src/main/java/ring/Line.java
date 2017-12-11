@@ -11,10 +11,18 @@ import java.util.Objects;
 
 public class Line implements Serializable {
 	private LocalDateTime date;
-	private ByteArrayOutputStream content;
+
+	final private ByteArrayOutputStream content;
 
 	public Line(String content) {
 		this(content.getBytes(StandardCharsets.UTF_8));
+	}
+
+	public Line(LocalDateTime date, String str) {
+		this.date = date;
+		byte[] bytes = str.getBytes(StandardCharsets.UTF_8);
+		this.content = new ByteArrayOutputStream(bytes.length);
+		this.content.write(bytes, 0, bytes.length);
 	}
 
 	public Line(byte[] bytes) {
@@ -43,6 +51,10 @@ public class Line implements Serializable {
 
 	public byte[] getContent() {
 		return content.toByteArray();
+	}
+
+	public String toString() {
+		return content.toString();
 	}
 
 	@Override
