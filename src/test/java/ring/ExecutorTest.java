@@ -6,13 +6,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 
 import static org.junit.Assert.assertEquals;
 
 public class ExecutorTest {
 	Executor executor;
 	Thread executorThread;
+	Future<Void> done = Future.future();
 
 	@Before
 	public void setUp() {
@@ -38,13 +38,9 @@ public class ExecutorTest {
 		assertEquals(0, buffer.size());
 	}
 
-	private void checkThreadJoinable(AsyncResult<Boolean> ar) {
+	private void checkThreadJoinable(AsyncResult<Void> ar) {
 		assertEquals(true, ar.succeeded());
-		try {
-			executorThread.join();
-		} catch(InterruptedException e) {
-			System.out.printf("Interrupted\n");
-		}
+		done.complete();
 	}
 
 	@Test
@@ -57,7 +53,13 @@ public class ExecutorTest {
 		fr.setHandler(this::checkFirstRead);
 		fr = executor.read(r);
 		fr.setHandler(this::checkSecondRead);
-		Future<Boolean> fb = executor.stop();
+		Future<Void> fb = executor.stop();
 		fb.setHandler(this::checkThreadJoinable);
+		done.result();
+		try {
+			executorThread.join();
+		} catch(InterruptedException e) {
+			System.out.printf("Interrupted\n");
+		}
 	}
 }

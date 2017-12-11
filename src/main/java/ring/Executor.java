@@ -10,7 +10,7 @@ import java.util.logging.Logger;
 
 public class Executor implements Runnable {
 	private Ring ring;
-	private BlockingQueue<Callable<Future<Boolean>>> queue;
+	private BlockingQueue<Callable<Future<Void>>> queue;
 	private Logger logger = Logger.getLogger("RING");
 
 	public Executor(int ringSize, int queueSize) {
@@ -18,7 +18,7 @@ public class Executor implements Runnable {
 		ring = new Ring(ringSize);
 	}
 
-	public Future<Reader> read(Reader r) throws InterruptedException {
+	public Future<Reader> read(Reader r) {
 		Future<Reader> readerFuture = Future.future();
 		submit(() -> {
 			ring.read(r);
@@ -28,44 +28,46 @@ public class Executor implements Runnable {
 		return readerFuture;
 	}
 
-	public Future<Boolean> write(Message msg) throws InterruptedException {
-		Future<Boolean> future = Future.future();
+	public Future<Void> write(Message msg) {
+		Future<Void> future = Future.future();
 		submit(() -> {
 			ring.write(msg);
-			future.complete(true);
+			future.complete();
 			return null;
 		});
 		return future;
 	}
 
-	public Future<Boolean> writeBatch(Iterable<Message> msgs) throws InterruptedException {
-		Future<Boolean> future = Future.future();
+	public Future<Void> writeBatch(Iterable<Message> msgs) {
+		Future<Void> future = Future.future();
 		submit(() -> {
 			for (Message msg : msgs) {
 				ring.write(msg);
 			}
-			future.complete(true);
+			future.complete();
 			return null;
 		});
 		return future;
 	}
 
-	public Future<Boolean> stop() throws InterruptedException {
-		Future<Boolean> stopped = Future.future();
+	public Future<Void> stop() {
+		Future<Void> stopped = Future.future();
 		submit(() -> {
 			return stopped; // Stop execution and signal back.
 		});
 		return stopped;
 	}
 
-	private void submit(Callable<Future<Boolean>> c) throws InterruptedException {
-		queue.put(c);
+	private void submit(Callable<Future<Void>> c) {
+		try {
+			queue.put(c);
+		} catch (InterruptedException e) {}
 	}
 
 	@Override
 	public void run() {
 		while (true) {
-			Callable<Future<Boolean>> c;
+			Callable<Future<Void>> c;
 			try {
 				c = queue.take();
 			} catch (InterruptedException e) {
@@ -73,11 +75,11 @@ public class Executor implements Runnable {
 				return;
 			}
 			try {
-				Future<Boolean> done = c.call();
+				Future<Void> done = c.call();
 				if (done != null) {
 					logger.info("Loop shutting down, exiting...");
 					// ... could do any cleanup here.
-					done.complete(true);
+					done.complete();
 					return;
 				}
 			} catch (Exception e) {
