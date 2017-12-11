@@ -1,14 +1,16 @@
 package ring;
 
-import ring.futures.ReaderFuture;
+import io.vertx.core.Future;
 
-import java.util.concurrent.*;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Executor implements Runnable {
 	private Ring ring;
-	private BlockingQueue<Callable<CompletableFuture<Boolean>>> queue;
+	private BlockingQueue<Callable<Future<Boolean>>> queue;
 	private Logger logger = Logger.getLogger("RING");
 
 	public Executor(int ringSize, int queueSize) {
@@ -17,17 +19,17 @@ public class Executor implements Runnable {
 	}
 
 	public Future<Reader> read(Reader r) throws InterruptedException {
-		ReaderFuture readerFuture = new ReaderFuture();
+		Future<Reader> readerFuture = Future.future();
 		submit(() -> {
 			ring.read(r);
-			readerFuture.put(r);
+			readerFuture.complete(r);
 			return null;
 		});
 		return readerFuture;
 	}
 
 	public Future<Boolean> write(Message msg) throws InterruptedException {
-		CompletableFuture<Boolean> future = new CompletableFuture<>();
+		Future<Boolean> future = Future.future();
 		submit(() -> {
 			ring.write(msg);
 			future.complete(true);
@@ -37,7 +39,7 @@ public class Executor implements Runnable {
 	}
 
 	public Future<Boolean> writeBatch(Iterable<Message> msgs) throws InterruptedException {
-		CompletableFuture<Boolean> future = new CompletableFuture<>();
+		Future<Boolean> future = Future.future();
 		submit(() -> {
 			for (Message msg : msgs) {
 				ring.write(msg);
@@ -48,22 +50,22 @@ public class Executor implements Runnable {
 		return future;
 	}
 
-	public CompletableFuture<Boolean> stop() throws InterruptedException {
-		CompletableFuture<Boolean> stopped = new CompletableFuture<>();
+	public Future<Boolean> stop() throws InterruptedException {
+		Future<Boolean> stopped = Future.future();
 		submit(() -> {
 			return stopped; // Stop execution and signal back.
 		});
 		return stopped;
 	}
 
-	private void submit(Callable<CompletableFuture<Boolean>> c) throws InterruptedException {
+	private void submit(Callable<Future<Boolean>> c) throws InterruptedException {
 		queue.put(c);
 	}
 
 	@Override
 	public void run() {
 		while (true) {
-			Callable<CompletableFuture<Boolean>> c;
+			Callable<Future<Boolean>> c;
 			try {
 				c = queue.take();
 			} catch (InterruptedException e) {
@@ -71,7 +73,7 @@ public class Executor implements Runnable {
 				return;
 			}
 			try {
-				CompletableFuture<Boolean> done = c.call();
+				Future<Boolean> done = c.call();
 				if (done != null) {
 					logger.info("Loop shutting down, exiting...");
 					// ... could do any cleanup here.
