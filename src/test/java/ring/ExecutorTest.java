@@ -23,9 +23,9 @@ public class ExecutorTest {
 	private void checkFirstRead(AsyncResult<Reader> ar) {
 		assertEquals(true, ar.succeeded());
 		Reader r = ar.result();
-		List<Message> buffer = r.getBuffer();
+		List<Line> buffer = r.getBuffer();
 		assertEquals(2, buffer.size());
-		Message msg = buffer.get(0);
+		Line msg = buffer.get(0);
 		assertEquals("test 1", new String(msg.getContent()));
 		msg = buffer.get(1);
 		assertEquals("test 2", new String(msg.getContent()));
@@ -34,7 +34,7 @@ public class ExecutorTest {
 	private void checkSecondRead(AsyncResult<Reader> ar) {
 		assertEquals(true, ar.succeeded());
 		Reader r = ar.result();
-		List<Message> buffer = r.getBuffer();
+		List<Line> buffer = r.getBuffer();
 		assertEquals(0, buffer.size());
 	}
 
@@ -47,8 +47,8 @@ public class ExecutorTest {
 	public void executorOnSeparateThread() throws InterruptedException {
 		executorThread.start();
 		Reader r = new Reader("test reader", 2);
-		executor.write(new Message("test 1"));
-		executor.write(new Message("test 2"));
+		executor.write(new Line("test 1"));
+		executor.write(new Line("test 2"));
 		Future<Reader> fr = executor.read(r);
 		fr.setHandler(this::checkFirstRead);
 		fr = executor.read(r);

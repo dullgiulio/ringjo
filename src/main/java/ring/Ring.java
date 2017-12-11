@@ -2,16 +2,16 @@ package ring;
 
 public class Ring {
 	protected int size;
-	protected Message[] buffer;
+	protected Line[] buffer;
 	protected long last = 0;
 	protected long pos = 0;
 
 	public Ring(int size) {
 		this.size = size;
-		this.buffer = new Message[size];
+		this.buffer = new Line[size];
 	}
 
-	public void write(Message msg) {
+	public void write(Line msg) {
 		int lastDistance = (int) (pos - last);
 		// If the slowest reader is in the way, it will skip some messages.
 		// Advance the slowest reader to the current writing position.

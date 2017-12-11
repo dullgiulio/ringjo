@@ -5,13 +5,13 @@ import io.vertx.core.Future;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Callable;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import io.vertx.core.logging.Logger;
+import io.vertx.core.logging.LoggerFactory;
 
 public class Executor implements Runnable {
 	private Ring ring;
 	private BlockingQueue<Callable<Future<Void>>> queue;
-	private Logger logger = Logger.getLogger("RING");
+	private static final Logger logger = LoggerFactory.getLogger(Executor.class);
 
 	public Executor(int ringSize, int queueSize) {
 		queue = new ArrayBlockingQueue<>(queueSize);
@@ -28,7 +28,7 @@ public class Executor implements Runnable {
 		return readerFuture;
 	}
 
-	public Future<Void> write(Message msg) {
+	public Future<Void> write(Line msg) {
 		Future<Void> future = Future.future();
 		submit(() -> {
 			ring.write(msg);
@@ -38,10 +38,10 @@ public class Executor implements Runnable {
 		return future;
 	}
 
-	public Future<Void> writeBatch(Iterable<Message> msgs) {
+	public Future<Void> writeBatch(Iterable<Line> msgs) {
 		Future<Void> future = Future.future();
 		submit(() -> {
-			for (Message msg : msgs) {
+			for (Line msg : msgs) {
 				ring.write(msg);
 			}
 			future.complete();
@@ -83,7 +83,7 @@ public class Executor implements Runnable {
 					return;
 				}
 			} catch (Exception e) {
-				logger.log(Level.SEVERE, "Exception", e);
+				logger.error("Exception", e);
 			}
 		}
 	}

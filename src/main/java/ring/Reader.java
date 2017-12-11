@@ -11,7 +11,7 @@ public class Reader implements Serializable {
 	private int rpos; // Position in reader buffer
 	private int capacity;
 	private boolean started;
-	private ArrayList<Message> buffer;
+	private ArrayList<Line> buffer;
 
 	public Reader(String name, int capacity) {
 		this.name = name;
@@ -38,7 +38,7 @@ public class Reader implements Serializable {
 		return capacity;
 	}
 
-	public List<Message> getBuffer() {
+	public List<Line> getBuffer() {
 		return buffer.subList(0, rpos);
 	}
 
@@ -46,7 +46,7 @@ public class Reader implements Serializable {
 		rpos = 0;
 	}
 
-	public void addMessage(Message msg) {
+	public void addMessage(Line msg) {
 		if (rpos >= buffer.size()) {
 			buffer.add(msg);
 		} else {

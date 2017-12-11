@@ -9,27 +9,27 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Objects;
 
-public class Message implements Serializable {
+public class Line implements Serializable {
 	private LocalDateTime date;
 	private ByteArrayOutputStream content;
 
-	public Message(String content) {
+	public Line(String content) {
 		this(content.getBytes(StandardCharsets.UTF_8));
 	}
 
-	public Message(byte[] bytes) {
+	public Line(byte[] bytes) {
 		this.date = LocalDateTime.now();
 		this.content = new ByteArrayOutputStream(bytes.length);
 		this.content.write(bytes, 0, bytes.length);
 	}
 
-	public void set(Message msg) throws IOException {
+	public void set(Line msg) throws IOException {
 		date = msg.getDate();
 		content.reset();
 		msg.writeTo(this);
 	}
 
-	public void writeTo(Message msg) throws IOException {
+	public void writeTo(Line msg) throws IOException {
 		content.writeTo(msg.getBuffer());
 	}
 
@@ -52,10 +52,10 @@ public class Message implements Serializable {
 
 	@Override
 	public boolean equals(Object o) {
-		if (!(o instanceof Message)) {
+		if (!(o instanceof Line)) {
 			return false;
 		}
-		return Objects.equals(((Message) o).getDate(), getDate()) &&
-				Arrays.equals(((Message) o).getContent(), getContent());
+		return Objects.equals(((Line) o).getDate(), getDate()) &&
+				Arrays.equals(((Line) o).getContent(), getContent());
 	}
 }
