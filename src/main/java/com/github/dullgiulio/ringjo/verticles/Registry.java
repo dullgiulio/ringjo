@@ -48,6 +48,7 @@ public class Registry extends AbstractVerticle {
 							String.format("A ring named %s already exists", name));
 					return;
 				}
+				names.put(name, ""); // placeholder
 			}
 			JsonObject config = new JsonObject().put("name", name).put("size", 1024);
 			DeploymentOptions options = new DeploymentOptions().setConfig(config);
@@ -79,6 +80,11 @@ public class Registry extends AbstractVerticle {
 					return;
 				}
 				deployID = names.get(name);
+				if (deployID.equals("")) {
+					event.fail(HttpResponseStatus.NOT_FOUND.code(),
+							String.format("A ring named %s was not yet started", name));
+					return;
+				}
 				names.remove(name);
 			}
 			vertx.undeploy(deployID, res -> {
