@@ -18,7 +18,7 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 
-import java.util.function.Function;
+import java.util.function.BiFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -29,6 +29,8 @@ public class HttpRunner extends AbstractVerticle {
 	private final Pattern onlyAlphanum = Pattern.compile("[a-zA-Z0-9_\\-]+");
 	private final String defaultReaderName = "_unnamed";
 	private final int defaultReaderCapacity = 100;
+
+	private interface RingResponse extends BiFunction<RoutingContext, RingRequest, Future<Buffer>> {}
 
 	private class DefaultWebHandler implements Handler<AsyncResult<Buffer>> {
 		HttpServerResponse resp;
@@ -67,7 +69,7 @@ public class HttpRunner extends AbstractVerticle {
 		responseError(resp, status, t.getMessage());
 	}
 
-	private Handler<RoutingContext> namedRequest(Function<RingRequest, Future<Buffer>> handle) {
+	private Handler<RoutingContext> namedRequest(RingResponse handle) {
 		return rc -> {
 			HttpServerRequest req = rc.request();
 			HttpServerResponse resp = req.response();
@@ -79,46 +81,51 @@ public class HttpRunner extends AbstractVerticle {
 				return;
 			}
 			RingRequest rr = new RingRequest(vertx, name);
-			Future<Buffer> fut = handle.apply(rr);
+			Future<Buffer> fut = handle.apply(rc, rr);
 			fut.setHandler(new DefaultWebHandler(resp));
 		};
 	}
 
-	private Function<RingRequest, Future<Buffer>> handleGet() {
-		return rr -> {
+	private RingResponse handleGet() {
+		return (rc, rr) -> {
 			LOG.info(String.format("Read request for ring %s", rr.getRingName()));
 			Reader reader = new Reader(defaultReaderName, defaultReaderCapacity);
 			return rr.requestRead(reader);
 		};
 	}
 
-	private Function<RingRequest, Future<Buffer>> handlePost() {
-		return rr -> {
-			// TODO: we don't have RoutingContext here; refactor further.
-			//Buffer body = rc.getBody(); // TODO: test with curl
-			Buffer body = Buffer.buffer("Hello\nWorld\nTest again\nAnd again\n"); // TODO: remove.
-
+	private RingResponse handleDummyPost() {
+		return (rc, rr) -> {
+			Buffer body = Buffer.buffer("Hello\nWorld\nTest again\nAnd again\n");
 			LOG.info(String.format("Post request for ring %s with body of size %d bytes", rr.getRingName(), body.length()));
 			return rr.requestWrite(body);
 		};
 	}
 
-	private Function<RingRequest, Future<Buffer>> handleStat() {
-		return rr -> {
+	private RingResponse handlePost() {
+		return (rc, rr) -> {
+			Buffer body = rc.getBody();
+			LOG.info(String.format("Post request for ring %s with body of size %d bytes", rr.getRingName(), body.length()));
+			return rr.requestWrite(body);
+		};
+	}
+
+	private RingResponse handleStat() {
+		return (rc, rr) -> {
 			LOG.info(String.format("Stat request for ring %s", rr.getRingName()));
 			return rr.requestStat();
 		};
 	}
 
-	private Function<RingRequest, Future<Buffer>> handleOpen() {
-		return rr -> {
+	private RingResponse handleOpen() {
+		return (rc, rr) -> {
 			LOG.info(String.format("Open request for ring %s", rr.getRingName()));
 			return rr.requestOpen();
 		};
 	}
 
-	private Function<RingRequest, Future<Buffer>> handleClose() {
-		return rr -> {
+	private RingResponse handleClose() {
+		return (rc, rr) -> {
 			LOG.info(String.format("Close request for ring %s", rr.getRingName()));
 			return rr.requestClose();
 		};
@@ -135,7 +142,8 @@ public class HttpRunner extends AbstractVerticle {
 		router.get("/close/:name").handler(namedRequest(handleClose()));
 		router.get("/read/:name").handler(namedRequest(handleGet()));
 		router.post("/write/:name").handler(namedRequest(handlePost()));
-		router.get("/write/:name").handler(namedRequest(handlePost())); // TODO: For testing without actually posting data; remove
+		// TODO: For testing without actually posting data; remove
+		router.get("/write/:name").handler(namedRequest(handleDummyPost()));
 
 		HttpServer server = vertx.createHttpServer(options).requestHandler(router::accept);
 		server.listen(port, event -> {
