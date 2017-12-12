@@ -2,6 +2,8 @@ package com.github.dullgiulio.ringjo.verticles;
 
 import com.github.dullgiulio.ringjo.codecs.ReaderCodec;
 import com.github.dullgiulio.ringjo.ring.Reader;
+import com.github.dullgiulio.ringjo.verticles.bus.RingRequest;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.*;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
@@ -12,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Registry extends AbstractVerticle {
-	private final String BUS_EXECUTOR = "com.github.dullgiulio.ringjo.verticles.BusExecutor";
+	private static final String BUS_EXECUTOR = "com.github.dullgiulio.ringjo.verticles.BusExecutor";
 	private static final Logger LOG = LoggerFactory.getLogger(Registry.class);
 
 	private Map<String, String> names = new HashMap<>();
@@ -41,7 +43,8 @@ public class Registry extends AbstractVerticle {
 
 			synchronized (names) {
 				if (names.containsKey(name)) {
-					event.fail(409, String.format("A ring named %s already exists", name));
+					event.fail(HttpResponseStatus.CONFLICT.code(),
+							String.format("A ring named %s already exists", name));
 					return;
 				}
 			}
@@ -49,7 +52,8 @@ public class Registry extends AbstractVerticle {
 			DeploymentOptions options = new DeploymentOptions().setConfig(config);
 			vertx.deployVerticle(BUS_EXECUTOR, options, res -> {
 				if (!res.succeeded()) {
-					event.fail(500, String.format("could not start verticle: %s", res.cause().getMessage()));
+					event.fail(HttpResponseStatus.INTERNAL_SERVER_ERROR.code(),
+							String.format("could not start verticle: %s", res.cause().getMessage()));
 					return;
 				}
 				synchronized (names) {
@@ -69,7 +73,8 @@ public class Registry extends AbstractVerticle {
 
 			synchronized (names) {
 				if (!names.containsKey(name)) {
-					event.fail(409, String.format("A ring named %s does not exist", name));
+					event.fail(HttpResponseStatus.CONFLICT.code(),
+							String.format("A ring named %s does not exist", name));
 					return;
 				}
 				deployID = names.get(name);
@@ -77,7 +82,8 @@ public class Registry extends AbstractVerticle {
 			}
 			vertx.undeploy(deployID, res -> {
 				if (!res.succeeded()) {
-					event.fail(500, String.format("could not stop ring %s", name));
+					event.fail(HttpResponseStatus.INTERNAL_SERVER_ERROR.code(),
+							String.format("could not stop ring %s", name));
 					return;
 				}
 				event.reply("OK");
@@ -93,8 +99,8 @@ public class Registry extends AbstractVerticle {
 
 	@Override
 	public void start() {
-		vertx.eventBus().consumer("ringjo.open", new HandleOpen());
-		vertx.eventBus().consumer("ringjo.close", new HandleClose());
-		vertx.eventBus().consumer("ringjo.stat", new HandleStat());
+		vertx.eventBus().consumer(RingRequest.OPEN_ADDRESS, new HandleOpen());
+		vertx.eventBus().consumer(RingRequest.CLOSE_ADDRESS, new HandleClose());
+		vertx.eventBus().consumer(RingRequest.STAT_ADDRESS, new HandleStat());
 	}
 }

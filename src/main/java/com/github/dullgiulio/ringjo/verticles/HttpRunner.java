@@ -2,6 +2,7 @@ package com.github.dullgiulio.ringjo.verticles;
 
 import com.github.dullgiulio.ringjo.ring.Reader;
 import com.github.dullgiulio.ringjo.verticles.bus.RingRequest;
+import io.netty.handler.codec.http.HttpResponseStatus;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;
@@ -25,8 +26,9 @@ public class HttpRunner extends AbstractVerticle {
 	private int port;
 
 	private static final Logger LOG = LoggerFactory.getLogger(HttpRunner.class);
-
 	private final Pattern onlyAlphanum = Pattern.compile("[a-zA-Z0-9_\\-]+");
+	private final String defaultReaderName = "_unnamed";
+	private final int defaultReaderCapacity = 100;
 
 	private class DefaultWebHandler implements Handler<AsyncResult<Buffer>> {
 		HttpServerResponse resp;
@@ -38,7 +40,7 @@ public class HttpRunner extends AbstractVerticle {
 		@Override
 		public void handle(AsyncResult<Buffer> ar) {
 			if (!ar.succeeded()) {
-				resp.setStatusCode(500);
+				resp.setStatusCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
 				resp.end(ar.cause().getMessage());
 				return;
 			}
@@ -65,7 +67,7 @@ public class HttpRunner extends AbstractVerticle {
 			if (!validName(name)) {
 				String err = String.format("Invalid name '%s' requested", name);
 				LOG.info(String.format("invalid request received: %s", err));
-				resp.setStatusCode(400);
+				resp.setStatusCode(HttpResponseStatus.BAD_REQUEST.code());
 				resp.end(err);
 				return;
 			}
@@ -78,7 +80,7 @@ public class HttpRunner extends AbstractVerticle {
 	private Function<RingRequest, Future<Buffer>> handleGet() {
 		return rr -> {
 			LOG.info(String.format("Read request for ring %s", rr.getRingName()));
-			Reader reader = new Reader("_unnamed", 100);
+			Reader reader = new Reader(defaultReaderName, defaultReaderCapacity);
 			return rr.requestRead(reader);
 		};
 	}

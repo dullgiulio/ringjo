@@ -13,9 +13,9 @@ public class RingRequest {
 	private RingAddress address;
 	private Vertx vertx;
 
-	private final String OPEN_ADDRESS = "ringjo.open";
-	private final String CLOSE_ADDRESS = "ringjo.close";
-	private final String STAT_ADDRESS = "ringjo.stat";
+	public static final String OPEN_ADDRESS = "ringjo.open";
+	public static final String CLOSE_ADDRESS = "ringjo.close";
+	public static final String STAT_ADDRESS = "ringjo.stat";
 
 	public RingRequest(Vertx vertx, String name) {
 		this.vertx = vertx;
@@ -25,6 +25,8 @@ public class RingRequest {
 	private Future<Buffer> requestAddress(String addr) {
 		Future<Buffer> fut = Future.future();
 		vertx.eventBus().send(addr, address.getName(), ar -> {
+			// TODO: Return some object that includes both the status code and error message
+			// 		 Currently the status gets lost here and it always returned as 500.
 			Buffer buffer = Buffer.buffer();
 			if (!ar.succeeded()) {
 				fut.fail(ar.cause().getMessage());
