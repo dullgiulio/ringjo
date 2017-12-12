@@ -40,8 +40,7 @@ public class HttpRunner extends AbstractVerticle {
 		@Override
 		public void handle(AsyncResult<Buffer> ar) {
 			if (!ar.succeeded()) {
-				resp.setStatusCode(HttpResponseStatus.INTERNAL_SERVER_ERROR.code());
-				resp.end(ar.cause().getMessage());
+				HttpRunner.responseError(resp, HttpResponseStatus.INTERNAL_SERVER_ERROR, ar.cause());
 				return;
 			}
 			resp.putHeader("Content-Type", "text/plain");
@@ -59,6 +58,15 @@ public class HttpRunner extends AbstractVerticle {
 		return m.matches();
 	}
 
+	protected static void responseError(HttpServerResponse resp, HttpResponseStatus status, String message) {
+		resp.setStatusCode(status.code());
+		resp.end(message);
+	}
+
+	protected static void responseError(HttpServerResponse resp, HttpResponseStatus status, Throwable t) {
+		responseError(resp, status, t.getMessage());
+	}
+
 	private Handler<RoutingContext> namedRequest(Function<RingRequest, Future<Buffer>> handle) {
 		return rc -> {
 			HttpServerRequest req = rc.request();
@@ -67,8 +75,7 @@ public class HttpRunner extends AbstractVerticle {
 			if (!validName(name)) {
 				String err = String.format("Invalid name '%s' requested", name);
 				LOG.info(String.format("invalid request received: %s", err));
-				resp.setStatusCode(HttpResponseStatus.BAD_REQUEST.code());
-				resp.end(err);
+				responseError(resp, HttpResponseStatus.BAD_REQUEST, err);
 				return;
 			}
 			RingRequest rr = new RingRequest(vertx, name);
