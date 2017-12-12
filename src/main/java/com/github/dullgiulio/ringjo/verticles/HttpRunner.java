@@ -18,11 +18,15 @@ import io.vertx.ext.web.RoutingContext;
 import io.vertx.ext.web.handler.BodyHandler;
 
 import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class HttpRunner extends AbstractVerticle {
 	private int port;
 
 	private static final Logger LOG = LoggerFactory.getLogger(HttpRunner.class);
+
+	private final Pattern onlyAlphanum = Pattern.compile("[a-zA-Z0-9_\\-]+");
 
 	private class DefaultWebHandler implements Handler<AsyncResult<Buffer>> {
 		HttpServerResponse resp;
@@ -48,11 +52,23 @@ public class HttpRunner extends AbstractVerticle {
 		return this;
 	}
 
+	private boolean validName(String name) {
+		Matcher m = onlyAlphanum.matcher(name);
+		return m.matches();
+	}
+
 	private Handler<RoutingContext> namedRequest(Function<RingRequest, Future<Buffer>> handle) {
 		return rc -> {
 			HttpServerRequest req = rc.request();
 			HttpServerResponse resp = req.response();
 			String name = req.getParam("name");
+			if (!validName(name)) {
+				String err = String.format("Invalid name '%s' requested", name);
+				LOG.info(String.format("invalid request received: %s", err));
+				resp.setStatusCode(400);
+				resp.end(err);
+				return;
+			}
 			RingRequest rr = new RingRequest(vertx, name);
 			Future<Buffer> fut = handle.apply(rr);
 			fut.setHandler(new DefaultWebHandler(resp));
