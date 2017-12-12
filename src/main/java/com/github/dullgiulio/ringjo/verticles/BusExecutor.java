@@ -30,7 +30,9 @@ public class BusExecutor extends AbstractVerticle {
 		public void handle(Message<Reader> event) {
 			Reader r = event.body();
 			LOG.info(String.format("Received read at position '%d'", r.getPos()));
-			ring.read(r);
+			synchronized (ring) {
+				ring.read(r);
+			}
 			event.reply(r);
 		}
 	}
@@ -59,8 +61,10 @@ public class BusExecutor extends AbstractVerticle {
 				event.reply(-1);
 				return;
 			}
-			for (String line : lines) {
-				ring.write(new Line(line));
+			synchronized (ring) {
+				for (String line : lines) {
+					ring.write(new Line(line));
+				}
 			}
 			event.reply(lines.size());
 		}
