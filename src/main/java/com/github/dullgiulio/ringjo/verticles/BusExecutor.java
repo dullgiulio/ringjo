@@ -1,17 +1,16 @@
-package verticles;
+package com.github.dullgiulio.ringjo.verticles;
 
-import codecs.ReaderCodec;
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Context;
 import io.vertx.core.Handler;
-import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.Message;
+import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import ring.Line;
-import ring.Reader;
-import ring.Ring;
+import com.github.dullgiulio.ringjo.ring.Line;
+import com.github.dullgiulio.ringjo.ring.Reader;
+import com.github.dullgiulio.ringjo.ring.Ring;
+import com.github.dullgiulio.ringjo.verticles.bus.RingAddress;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -21,14 +20,10 @@ import java.util.List;
 
 public class BusExecutor extends AbstractVerticle {
 	private Ring ring;
+	private RingAddress address;
 	private int ringSize;
 
 	private static final Logger LOG = LoggerFactory.getLogger(HttpRunner.class);
-
-	public BusExecutor setRingSize(int ringSize) {
-		this.ringSize = ringSize;
-		return this;
-	}
 
 	private class HandleRead implements Handler<Message<Reader>> {
 		@Override
@@ -72,15 +67,14 @@ public class BusExecutor extends AbstractVerticle {
 	}
 
 	@Override
-	public void init(Vertx vertx, Context context) {
-		super.init(vertx, context);
-		vertx.eventBus().registerDefaultCodec(Reader.class, new ReaderCodec());
-	}
-
-	@Override
 	public void start() {
+		JsonObject config = config();
+		if (config != null) {
+			address = new RingAddress(config.getString("name"));
+			ringSize = config.getInteger("size");
+		}
 		ring = new Ring(ringSize);
-		vertx.eventBus().consumer("ringjo.read", new HandleRead());
-		vertx.eventBus().consumer("ringjo.write", new HandleWriteBuffer());
+		vertx.eventBus().consumer(address.getReadAddress(), new HandleRead());
+		vertx.eventBus().consumer(address.getWriteAddress(), new HandleWriteBuffer());
 	}
 }

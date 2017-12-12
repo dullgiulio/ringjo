@@ -1,11 +1,11 @@
-package codecs;
+package com.github.dullgiulio.ringjo.codecs;
 
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.MessageCodec;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
-import ring.Line;
-import ring.Reader;
+import com.github.dullgiulio.ringjo.ring.Line;
+import com.github.dullgiulio.ringjo.ring.Reader;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;

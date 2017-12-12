@@ -1,4 +1,4 @@
-package ring;
+package com.github.dullgiulio.ringjo.ring;
 
 import io.vertx.core.AsyncResult;
 import io.vertx.core.Future;

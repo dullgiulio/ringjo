@@ -1,4 +1,4 @@
-package ring;
+package com.github.dullgiulio.ringjo.ring;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

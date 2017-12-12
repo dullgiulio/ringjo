@@ -1,4 +1,4 @@
-package ring;
+package com.github.dullgiulio.ringjo.ring;
 
 public class Ring {
 	final protected int size;
