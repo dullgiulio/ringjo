@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Registry extends AbstractVerticle {
-	private static final String BUS_EXECUTOR = "com.github.dullgiulio.ringjo.verticles.BusExecutor";
+	private static final String BUS_EXECUTOR = BusExecutor.class.getCanonicalName();
 	private static final Logger LOG = LoggerFactory.getLogger(Registry.class);
 
 	private Map<String, String> names = new HashMap<>();
