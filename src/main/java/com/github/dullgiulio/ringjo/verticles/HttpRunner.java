@@ -86,7 +86,7 @@ public class HttpRunner extends AbstractVerticle {
 		};
 	}
 
-	private RingResponse handleGet() {
+	private RingResponse handleRead() {
 		return (rc, rr) -> {
 			LOG.info(String.format("Read request for ring %s", rr.getRingName()));
 			Reader reader = new Reader(defaultReaderName, defaultReaderCapacity);
@@ -102,7 +102,7 @@ public class HttpRunner extends AbstractVerticle {
 		};
 	}
 
-	private RingResponse handlePost() {
+	private RingResponse handleWrite() {
 		return (rc, rr) -> {
 			Buffer body = rc.getBody();
 			LOG.info(String.format("Post request for ring %s with body of size %d bytes", rr.getRingName(), body.length()));
@@ -140,8 +140,8 @@ public class HttpRunner extends AbstractVerticle {
 		router.get("/stat/:name").handler(namedRequest(handleStat()));
 		router.get("/open/:name").handler(namedRequest(handleOpen()));
 		router.get("/close/:name").handler(namedRequest(handleClose()));
-		router.get("/read/:name").handler(namedRequest(handleGet()));
-		router.post("/write/:name").handler(namedRequest(handlePost()));
+		router.get("/read/:name").handler(namedRequest(handleRead()));
+		router.post("/write/:name").handler(namedRequest(handleWrite()));
 		// TODO: For testing without actually posting data; remove
 		router.get("/write/:name").handler(namedRequest(handleDummyPost()));
 
