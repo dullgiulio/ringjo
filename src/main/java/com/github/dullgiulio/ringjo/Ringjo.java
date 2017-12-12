@@ -1,8 +1,8 @@
 package com.github.dullgiulio.ringjo;
 
-import io.vertx.core.Vertx;
-import com.github.dullgiulio.ringjo.verticles.Registry;
 import com.github.dullgiulio.ringjo.verticles.HttpRunner;
+import com.github.dullgiulio.ringjo.verticles.Registry;
+import io.vertx.core.Vertx;
 
 public class Ringjo {
 	public static void main(String[] args) {

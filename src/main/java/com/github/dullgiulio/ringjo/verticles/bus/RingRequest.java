@@ -1,10 +1,10 @@
 package com.github.dullgiulio.ringjo.verticles.bus;
 
+import com.github.dullgiulio.ringjo.ring.Line;
+import com.github.dullgiulio.ringjo.ring.Reader;
 import io.vertx.core.Future;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
-import com.github.dullgiulio.ringjo.ring.Line;
-import com.github.dullgiulio.ringjo.ring.Reader;
 
 import java.time.format.DateTimeFormatter;
 import java.util.List;
@@ -34,6 +34,10 @@ public class RingRequest {
 			fut.complete(buffer);
 		});
 		return fut;
+	}
+
+	public String getRingName() {
+		return address.getName();
 	}
 
 	public Future<Buffer> requestOpen() {

@@ -1,5 +1,9 @@
 package com.github.dullgiulio.ringjo.verticles;
 
+import com.github.dullgiulio.ringjo.ring.Line;
+import com.github.dullgiulio.ringjo.ring.Reader;
+import com.github.dullgiulio.ringjo.ring.Ring;
+import com.github.dullgiulio.ringjo.verticles.bus.RingAddress;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
@@ -7,10 +11,6 @@ import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
-import com.github.dullgiulio.ringjo.ring.Line;
-import com.github.dullgiulio.ringjo.ring.Reader;
-import com.github.dullgiulio.ringjo.ring.Ring;
-import com.github.dullgiulio.ringjo.verticles.bus.RingAddress;
 
 import java.io.BufferedReader;
 import java.io.IOException;
