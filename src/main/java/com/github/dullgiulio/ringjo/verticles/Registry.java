@@ -27,7 +27,8 @@ public class Registry extends AbstractVerticle {
 
 			synchronized (names) {
 				if (!names.containsKey(name)) {
-					event.fail(404, String.format("A ring named %s does not exists", name));
+					event.fail(HttpResponseStatus.NOT_FOUND.code(),
+							String.format("A ring named %s does not exists", name));
 					return;
 				}
 				event.reply("OK");
