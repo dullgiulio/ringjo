@@ -102,6 +102,7 @@ public class Registry extends AbstractVerticle {
 	@Override
 	public void init(Vertx vertx, Context context) {
 		super.init(vertx, context);
+		// TODO: this should not be here but in BusExecutor, but done only once...
 		vertx.eventBus().registerDefaultCodec(Reader.class, new ReaderCodec());
 	}
 

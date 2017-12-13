@@ -5,6 +5,7 @@ import com.github.dullgiulio.ringjo.ring.Reader;
 import com.github.dullgiulio.ringjo.ring.Ring;
 import com.github.dullgiulio.ringjo.verticles.bus.RingAddress;
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Future;
 import io.vertx.core.Handler;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.core.eventbus.Message;
@@ -20,8 +21,6 @@ import java.util.List;
 
 public class BusExecutor extends AbstractVerticle {
 	private Ring ring;
-	private RingAddress address;
-	private int ringSize;
 
 	private static final Logger LOG = LoggerFactory.getLogger(HttpRunner.class);
 
@@ -70,15 +69,23 @@ public class BusExecutor extends AbstractVerticle {
 		}
 	}
 
-	@Override
-	public void start() {
-		JsonObject config = config();
-		if (config != null) {
-			address = new RingAddress(config.getString("name"));
-			ringSize = config.getInteger("size");
-		}
+	public void start(String name, int ringSize) {
+		RingAddress address = new RingAddress(name);
 		ring = new Ring(ringSize);
 		vertx.eventBus().consumer(address.getReadAddress(), new HandleRead());
 		vertx.eventBus().consumer(address.getWriteAddress(), new HandleWriteBuffer());
+	}
+
+	@Override
+	public void start(Future<Void> started) {
+		JsonObject config = config();
+		if (config == null || !config.containsKey("name") || !config.containsKey("size")) {
+			started.fail("configuration is compulsory: include name and size parameters");
+			return;
+		}
+		String name = config.getString("name");
+		int ringSize = config.getInteger("size");
+		start(name, ringSize);
+		started.complete();
 	}
 }
