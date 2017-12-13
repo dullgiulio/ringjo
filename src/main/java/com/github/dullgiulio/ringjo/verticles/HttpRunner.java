@@ -86,11 +86,38 @@ public class HttpRunner extends AbstractVerticle {
 		};
 	}
 
+	private long convertLong(String s) {
+		try {
+			return Long.parseLong(s);
+		} catch (NumberFormatException e) {
+			return -1;
+		}
+	}
+
 	private RingResponse handleRead() {
 		return (rc, rr) -> {
-			LOG.info(String.format("Read request for ring %s", rr.getRingName()));
+			HttpServerRequest req = rc.request();
+			long offset = convertLong(req.getParam("offset"));
+			if (offset < 0) {
+				LOG.info(String.format("Requested invalid offset '%s', forced zero", req.getParam("offset")));
+				offset = 0;
+			}
+			LOG.info(String.format("Read request for ring %s, offset %d", rr.getRingName(), offset));
 			Reader reader = new Reader(defaultReaderName, defaultReaderCapacity);
+			reader.setPos(offset);
 			return rr.requestRead(reader);
+		};
+	}
+
+	private Handler<RoutingContext> handleReadWithoutOffset() {
+		return rc -> {
+			HttpServerRequest req = rc.request();
+			HttpServerResponse resp = req.response();
+			String name = req.getParam("name");
+			LOG.info(String.format("Read request for ring %s without offset, redirected", name));
+			resp.putHeader("Location", req.path() + "/0");
+			resp.setStatusCode(HttpResponseStatus.PERMANENT_REDIRECT.code());
+			resp.end();
 		};
 	}
 
@@ -140,7 +167,8 @@ public class HttpRunner extends AbstractVerticle {
 		router.get("/stat/:name").handler(namedRequest(handleStat()));
 		router.get("/open/:name").handler(namedRequest(handleOpen()));
 		router.get("/close/:name").handler(namedRequest(handleClose()));
-		router.get("/read/:name").handler(namedRequest(handleRead()));
+		router.get("/read/:name").handler(handleReadWithoutOffset());
+		router.get("/read/:name/:offset").handler(namedRequest(handleRead()));
 		router.post("/write/:name").handler(namedRequest(handleWrite()));
 		// TODO: For testing without actually posting data; remove
 		router.get("/write/:name").handler(namedRequest(handleDummyPost()));
