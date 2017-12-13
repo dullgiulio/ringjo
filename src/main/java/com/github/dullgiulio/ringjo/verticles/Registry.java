@@ -54,6 +54,7 @@ public class Registry extends AbstractVerticle {
 			DeploymentOptions options = new DeploymentOptions().setConfig(config);
 			vertx.deployVerticle(BUS_EXECUTOR, options, res -> {
 				if (!res.succeeded()) {
+					names.remove(name);
 					event.fail(HttpResponseStatus.INTERNAL_SERVER_ERROR.code(),
 							String.format("could not start verticle: %s", res.cause().getMessage()));
 					return;
