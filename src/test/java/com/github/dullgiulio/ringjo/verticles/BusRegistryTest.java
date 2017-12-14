@@ -11,16 +11,16 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 @RunWith(VertxUnitRunner.class)
-public class RegistryTest {
+public class BusRegistryTest {
 	Vertx vertx;
 
 	@Before
 	public void setUp(TestContext context) {
 		vertx = Vertx.vertx();
-		vertx.deployVerticle(new Registry(), context.asyncAssertSuccess());
+		vertx.deployVerticle(new BusRegistry(), context.asyncAssertSuccess());
 	}
 
 	@After
