@@ -54,7 +54,7 @@ public class ReaderCodec implements MessageCodec<Reader, Reader> {
 		r.setBuffer(ls);
 		r.setPos(json.getInteger("pos"));
 		r.setReaderPos(json.getInteger("rpos"));
-		return null;
+		return r;
 	}
 
 	@Override

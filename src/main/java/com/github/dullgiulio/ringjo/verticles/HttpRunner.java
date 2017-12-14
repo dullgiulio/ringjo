@@ -32,7 +32,7 @@ public class HttpRunner extends AbstractVerticle {
 
 	private interface RingResponse extends BiFunction<RoutingContext, RingRequest, Future<Buffer>> {}
 
-	private class DefaultWebHandler implements Handler<AsyncResult<Buffer>> {
+	static private class DefaultWebHandler implements Handler<AsyncResult<Buffer>> {
 		HttpServerResponse resp;
 
 		public DefaultWebHandler(HttpServerResponse resp) {
