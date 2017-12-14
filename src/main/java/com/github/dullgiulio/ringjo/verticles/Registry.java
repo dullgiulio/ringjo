@@ -23,6 +23,11 @@ public class Registry extends AbstractVerticle {
 		@Override
 		public void handle(Message<String> event) {
 			String name = event.body();
+			if (name.equals("")) {
+				event.fail(HttpResponseStatus.BAD_REQUEST.code(),
+						String.format("Invalid empty name"));
+				return;
+			}
 			LOG.info(String.format("Received registry request to stat %s", name));
 
 			synchronized (names) {
@@ -40,6 +45,11 @@ public class Registry extends AbstractVerticle {
 		@Override
 		public void handle(Message<String> event) {
 			String name = event.body();
+			if (name.equals("")) {
+				event.fail(HttpResponseStatus.BAD_REQUEST.code(),
+						String.format("Invalid empty name"));
+				return;
+			}
 			LOG.info(String.format("Received registry request to add %s", name));
 
 			synchronized (names) {
@@ -59,9 +69,11 @@ public class Registry extends AbstractVerticle {
 							String.format("could not start verticle: %s", res.cause().getMessage()));
 					return;
 				}
+				String verID = res.result();
 				synchronized (names) {
-					names.put(name, res.result());
+					names.put(name, verID);
 				}
+				LOG.info(String.format("Started ring %s as verticle %s", name, verID));
 				event.reply("OK");
 			});
 		}
@@ -72,6 +84,11 @@ public class Registry extends AbstractVerticle {
 		public void handle(Message<String> event) {
 			String deployID;
 			String name = event.body();
+			if (name.equals("")) {
+				event.fail(HttpResponseStatus.BAD_REQUEST.code(),
+						String.format("Invalid empty name"));
+				return;
+			}
 			LOG.info(String.format("Received registry request to delete %s", name));
 
 			synchronized (names) {

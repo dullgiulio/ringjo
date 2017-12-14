@@ -2,7 +2,6 @@ package com.github.dullgiulio.ringjo.verticles;
 
 import com.github.dullgiulio.ringjo.codecs.ReaderCodec;
 import com.github.dullgiulio.ringjo.ring.Reader;
-import com.github.dullgiulio.ringjo.ring.RingReaderTest;
 import com.github.dullgiulio.ringjo.verticles.bus.RingAddress;
 import io.vertx.core.DeploymentOptions;
 import io.vertx.core.Vertx;
