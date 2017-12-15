@@ -76,6 +76,7 @@ public class Reader implements Serializable {
 		if (!(o instanceof Reader)) {
 			return false;
 		}
-		return (((Reader) o).getName().equals(name) && ((Reader) o).getPos() != getPos());
+		Reader r = (Reader) o;
+		return (r.getName().equals(name) && r.getPos() == getPos() && r.getReaderPos() == getReaderPos());
 	}
 }
