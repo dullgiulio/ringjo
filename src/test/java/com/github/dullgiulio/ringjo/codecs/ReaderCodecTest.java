@@ -4,7 +4,7 @@ import com.github.dullgiulio.ringjo.ring.Reader;
 import io.vertx.core.buffer.Buffer;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class ReaderCodecTest {
 	@Test

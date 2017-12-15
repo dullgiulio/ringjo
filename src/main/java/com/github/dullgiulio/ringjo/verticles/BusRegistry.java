@@ -1,12 +1,13 @@
 package com.github.dullgiulio.ringjo.verticles;
 
-import com.github.dullgiulio.ringjo.codecs.ReaderCodec;
-import com.github.dullgiulio.ringjo.ring.Reader;
 import com.github.dullgiulio.ringjo.verticles.bus.Registry;
 import com.github.dullgiulio.ringjo.verticles.bus.RingRequest;
 import com.github.dullgiulio.ringjo.verticles.exceptions.RegistryException;
 import io.netty.handler.codec.http.HttpResponseStatus;
-import io.vertx.core.*;
+import io.vertx.core.AbstractVerticle;
+import io.vertx.core.AsyncResult;
+import io.vertx.core.DeploymentOptions;
+import io.vertx.core.Handler;
 import io.vertx.core.eventbus.Message;
 import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
