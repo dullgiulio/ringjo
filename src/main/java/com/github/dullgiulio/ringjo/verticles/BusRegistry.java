@@ -12,7 +12,6 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
-
 public class BusRegistry extends AbstractVerticle {
 	private static final String BUS_EXECUTOR = BusExecutor.class.getCanonicalName();
 	private static final Logger LOG = LoggerFactory.getLogger(BusRegistry.class);
@@ -92,13 +91,6 @@ public class BusRegistry extends AbstractVerticle {
 
 		String deployID = registry.pop(name);
 		vertx.undeploy(deployID, ar -> wrapReply(() -> handleAfterUndeploy(name, ar), event));
-	}
-
-	@Override
-	public void init(Vertx vertx, Context context) {
-		super.init(vertx, context);
-		// TODO: this should not be here but in BusExecutor, but done only once...
-		vertx.eventBus().registerDefaultCodec(Reader.class, new ReaderCodec());
 	}
 
 	@Override
