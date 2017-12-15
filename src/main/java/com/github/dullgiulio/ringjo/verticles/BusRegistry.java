@@ -12,6 +12,7 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.core.logging.Logger;
 import io.vertx.core.logging.LoggerFactory;
 
+
 public class BusRegistry extends AbstractVerticle {
 	private static final String BUS_EXECUTOR = BusExecutor.class.getCanonicalName();
 	private static final Logger LOG = LoggerFactory.getLogger(BusRegistry.class);
@@ -62,6 +63,20 @@ public class BusRegistry extends AbstractVerticle {
 		}
 	}
 
+	@FunctionalInterface private interface HandlerWrapFn {
+		void apply() throws RegistryException;
+	}
+
+	private void wrapReply(HandlerWrapFn fn, Message<String> event) {
+		try {
+			fn.apply();
+		} catch (RegistryException e) {
+			event.fail(e.getStatus(), e.getMessage());
+		} finally {
+			event.reply("OK");
+		}
+	}
+
 	private void handleOpen(String name, Message<String> event) throws RegistryException {
 		JsonObject config = new JsonObject().put("name", name).put("size", 1024);
 		DeploymentOptions options = new DeploymentOptions().setConfig(config);
@@ -69,31 +84,14 @@ public class BusRegistry extends AbstractVerticle {
 		LOG.info(String.format("Received registry request to add %s", name));
 
 		registry.hold(name);
-
-		vertx.deployVerticle(BUS_EXECUTOR, options, ar -> {
-			try {
-				handleAfterDeploy(name, ar);
-			} catch (RegistryException e) {
-				event.fail(e.getStatus(), e.getMessage());
-			} finally {
-				event.reply("OK");
-			}
-		});
+		vertx.deployVerticle(BUS_EXECUTOR, options, ar -> wrapReply(() -> handleAfterDeploy(name, ar), event));
 	}
 
 	private void handleClose(String name, Message<String> event) throws RegistryException {
 		LOG.info(String.format("Received registry request to delete %s", name));
 
 		String deployID = registry.pop(name);
-		vertx.undeploy(deployID, ar -> {
-			try {
-				handleAfterUndeploy(name, ar);
-			} catch (RegistryException e) {
-				event.fail(e.getStatus(), e.getMessage());
-			} finally {
-				event.reply("OK");
-			}
-		});
+		vertx.undeploy(deployID, ar -> wrapReply(() -> handleAfterUndeploy(name, ar), event));
 	}
 
 	@Override
