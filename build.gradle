@@ -9,6 +9,17 @@ repositories {
     mavenCentral()
 }
 
+configurations {
+    compileJava
+}
+
+jar {
+    manifest {
+        attributes("Main-Class": "com.github.dullgiulio.ringjo.Ringjo")
+    }
+    from { configurations.compile.collect { it.isDirectory() ? it : zipTree(it) } }
+}
+
 dependencies {
     compile 'io.vertx:vertx-core:3.5.0'
     compile 'io.vertx:vertx-web:3.5.0'
