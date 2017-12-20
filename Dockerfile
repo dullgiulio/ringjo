@@ -1,7 +1,7 @@
 FROM openjdk:8
 
 RUN mkdir -p /opt/ringjo
-COPY build/libs/ringjo*.jar /opt/ringjo/ringjo.jar
+COPY build/libs/ringjo-1.0.jar /opt/ringjo/ringjo.jar
 
 WORKDIR /opt/ringjo
 ENTRYPOINT ["java", "-jar", "ringjo.jar"]
