@@ -2,6 +2,7 @@ package com.github.dullgiulio.ringjo.verticles;
 
 import com.github.dullgiulio.ringjo.verticles.bus.RingAddress;
 import com.github.dullgiulio.ringjo.verticles.bus.RingRequest;
+import com.github.dullgiulio.ringjo.verticles.bus.Registry;
 import io.vertx.core.Vertx;
 import io.vertx.core.buffer.Buffer;
 import io.vertx.ext.unit.TestContext;
@@ -10,6 +11,8 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.concurrent.ConcurrentHashMap;
 
 import static org.junit.Assert.assertEquals;
 
@@ -20,7 +23,7 @@ public class BusRegistryTest {
 	@Before
 	public void setUp(TestContext context) {
 		vertx = Vertx.vertx();
-		vertx.deployVerticle(new BusRegistry(), context.asyncAssertSuccess());
+		vertx.deployVerticle(new BusRegistry(new Registry()), context.asyncAssertSuccess());
 	}
 
 	@After

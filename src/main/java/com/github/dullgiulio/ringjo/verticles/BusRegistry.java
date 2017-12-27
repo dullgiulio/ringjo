@@ -17,7 +17,11 @@ public class BusRegistry extends AbstractVerticle {
 	private static final String BUS_EXECUTOR = BusExecutor.class.getCanonicalName();
 	private static final Logger LOG = LoggerFactory.getLogger(BusRegistry.class);
 
-	private final Registry registry = new Registry();
+	private final Registry registry;
+
+	public BusRegistry(Registry registry) {
+		this.registry = registry;
+	}
 
 	@FunctionalInterface private interface RegistryHandler {
 		void apply(String name, Message<String> event) throws RegistryException;
